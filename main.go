@@ -4,11 +4,11 @@ import (
 	"log"
 	"net/http"
 
-	"store/engines"
+	"store/engines/lsm"
 )
 
 func main() {
-	engine, err := engines.NewFileEngine("data.log")
+	engine, err := lsm.NewLSMEngine("data/lsm")
 	if err != nil {
 		log.Fatal(err)
 	}

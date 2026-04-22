@@ -2,7 +2,9 @@ package engines
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"sync"
@@ -44,7 +46,10 @@ func (f *FileEngine) replay() error {
 	for {
 		line, err := reader.ReadString('\n')
 		if err != nil {
-			break // EOF
+			if errors.Is(err, io.EOF) {
+				break
+			}
+			return err
 		}
 
 		line = strings.TrimSuffix(line, "\n")
