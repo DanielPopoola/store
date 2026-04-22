@@ -28,3 +28,7 @@ func (m *memoryEngine) Delete(key string) error {
 	delete(m.data, key)
 	return nil
 }
+
+func (m *memoryEngine) Close() error {
+	return nil
+}

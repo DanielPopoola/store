@@ -10,4 +10,7 @@ type Engine interface {
 
 	// Delete removes a key and its corresponding value from the storage
 	Delete(key string) error
+
+	// Closes a file cleanly
+	Close() error
 }

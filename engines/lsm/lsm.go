@@ -194,6 +194,17 @@ func (l *LSMEngine) Delete(key string) error {
 	return l.maybeFlush()
 }
 
+func (l *LSMEngine) Close() error {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
+	l.wal.Close()
+	for _, sst := range l.sstables {
+		sst.file.Close()
+	}
+	return nil
+}
+
 func (l *LSMEngine) maybeFlush() error {
 	if l.memtableSize < l.flushThreshold {
 		return nil

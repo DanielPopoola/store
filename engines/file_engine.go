@@ -150,3 +150,7 @@ func (f *FileEngine) Delete(key string) error {
 	delete(f.offsets, key)
 	return nil
 }
+
+func (f *FileEngine) Close() error {
+	return f.file.Close()
+}
