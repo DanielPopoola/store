@@ -8,7 +8,10 @@ import (
 )
 
 func main() {
-	engine := engines.NewMemoryEngine()
+	engine, err := engines.NewFileEngine("data.log")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	store := NewStore(engine)
 

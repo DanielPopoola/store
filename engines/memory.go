@@ -10,7 +10,7 @@ func NewMemoryEngine() *memoryEngine {
 	return &memoryEngine{data: make(map[string]string)}
 }
 
-func (m *memoryEngine) Set(key string, value string) error {
+func (m *memoryEngine) Set(key, value string) error {
 	m.data[key] = value
 	return nil
 }
