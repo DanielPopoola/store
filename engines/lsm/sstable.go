@@ -2,6 +2,7 @@ package lsm
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -12,6 +13,12 @@ import (
 type indexEntry struct {
 	key    string
 	offset int64
+}
+
+type sstableEntry struct {
+	Key     string `json:"key"`
+	Value   string `json:"value"`
+	Deleted bool   `json:"deleted"`
 }
 
 type SSTable struct {
@@ -46,7 +53,11 @@ func flushToSSTable(memtable *Memtable, dir string) (*SSTable, error) {
 	for i := range memtable.entries {
 		entry := &memtable.entries[i]
 
-		line := fmt.Sprintf("%s %s %t\n", entry.Key, entry.Value, entry.Deleted)
+		data, err := json.Marshal(sstableEntry{Key: entry.Key, Value: entry.Value, Deleted: entry.Deleted})
+		if err != nil {
+			return nil, err
+		}
+		line := string(data) + "\n"
 
 		n, err := file.WriteString(line)
 		if err != nil {
@@ -97,7 +108,7 @@ func (s *SSTable) Get(key string) (string, error) {
 			continue
 		}
 
-		k, v, deleted := parseLine(line)
+		k, v, deleted, _ := decodeLine(line)
 
 		if k > key {
 			return "", fmt.Errorf("not found")
@@ -130,16 +141,4 @@ func (s *SSTable) findOffset(key string) int64 {
 
 func splitLines(data string) []string {
 	return strings.Split(data, "\n")
-}
-
-func parseLine(line string) (key, value string, deleted bool) {
-	parts := strings.Split(line, " ")
-	if len(parts) < 3 {
-		return "", "", false
-	}
-
-	key = parts[0]
-	value = parts[1]
-	deleted = parts[2] == "true"
-	return
 }

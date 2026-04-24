@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"strings"
 	"sync"
 )
 
@@ -112,12 +111,7 @@ func rebuildIndex(s *SSTable) error {
 			continue
 		}
 
-		parts := splitEntry(line)
-		if len(parts) < 3 {
-			continue
-		}
-
-		key := parts[0]
+		key, _, _, _ := decodeLine(line)
 
 		if s.minKey == "" || key < s.minKey {
 			s.minKey = key
@@ -137,15 +131,11 @@ func rebuildIndex(s *SSTable) error {
 	return scanner.Err()
 }
 
-func splitEntry(line string) []string {
-	return strings.Split(line, " ")
-}
-
 func (l *LSMEngine) Set(key, value string) error {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
-	if err := appendWAL(l.wal, "SET", key, value); err != nil {
+	if err := appendWAL(l.wal, key, value, false); err != nil {
 		return err
 	}
 
@@ -184,7 +174,7 @@ func (l *LSMEngine) Delete(key string) error {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
-	if err := appendWAL(l.wal, "DELETE", key, ""); err != nil {
+	if err := appendWAL(l.wal, key, "", true); err != nil {
 		return err
 	}
 
